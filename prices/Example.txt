@@ -1,0 +1,2 @@
+﻿This is a option group title
+This is a option with the price separated by a comma, 1000

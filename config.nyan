@@ -1,0 +1,17 @@
+<?php
+define("SITENAME", "A websitename"); //網站名稱，記得修改
+
+/* 設定檔案名稱，必須與實際檔名符合 */
+define("INDEX", "index.nyan"); 
+define("CHECKOUT", "checkout.nyan");
+define("SHOW", "show.nyan");
+
+/* 前置檢查，以下不用修改 */
+define("NYAN_VERSION", "1.04");
+$meow_dir = dirname(__file__);
+if (!is_writable($meow_dir.'/cache/')) {
+	die('快取目錄無法寫入');
+} else if (!is_writable($meow_dir.'/valuations/')) {
+	die('報價目錄無法寫入');
+}
+?>
