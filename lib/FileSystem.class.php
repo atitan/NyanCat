@@ -28,12 +28,17 @@ class FileSystem
 
 	}
 
+	public function getDirTime()
+	{
+		return filemtime( $this->_curr_dir );
+	}
+
 	public function getDirList()
 	{
 		if ($handle = opendir($this->_curr_dir)) {
     		while (false !== ($entry = readdir($handle))) {
         		if ($entry != "." && $entry != "..") {
-            		$files[] = $entry;
+            		$fileList[] = $entry;
         		}
     		}
     		if ($ptr < 1) {
@@ -41,7 +46,7 @@ class FileSystem
 			}
     		closedir($handle);
 		}
-		return $files; //return array
+		return $fileList; //return array
 	}
 
 	public function getFileLineByLine($filename)

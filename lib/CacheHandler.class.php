@@ -2,19 +2,19 @@
 
 class CacheHandler
 {
-	public $gmtTime = null;
-	public $dirTime = null;
-	public $mTime = null;
-	private $_filehandler = null;
+	public static $priceMTime = '';
+	protected $_cacheFile = null;
+	protected $_priceFile = null;
 
 	public function __construct()
 	{
-		$this->_filehandler = new FileSystem('cache'); //Create new instance
+		$this->_cacheFile = new FileSystem('cache'); //Create new instance
+		$this->_priceFile = new FileSystem('price');
 		clearstatcache(); //Clear filesystem cache
-		$this->checkServerCache(); //Check server cache at instance startup
-		$this->mTime = filemtime( $this->_filehandler );
-		$this->dirTime = date("Y-m-d H:i:s", $this->mTime);
-		$this->gmtTime = gmdate("D, d M Y H:i:s", $this->mTime . " GMT";
+		static::$priceMTime = $this->_priceFile->getDirTime(); //Get price update time
+		// $this->mTime = filemtime( $this->_filehandler );
+		// $this->dirTime = date("Y-m-d H:i:s", $this->mTime);
+		// $this->gmtTime = gmdate("D, d M Y H:i:s", $this->mTime . " GMT";
 	}
 
 	public function checkServerCache()
@@ -24,8 +24,10 @@ class CacheHandler
 			$this->_filehandler->exists('productCache') &&
 			$this->_filehandler->exists('eTag') )
 		{
-			$timeStamp = $this->_filehandler->getFile('timeStamp');
-			if (strtotime($this->dirTime) > strtotime($timeStamp)) {
+			$timeStamp = $this->_priceFile->getFile('timeStamp');
+			$lastUpdateTime = date("Y-m-d H:i:s", static::$priceMTime);
+			
+			if (strtotime($lastUpdateTime) > strtotime($timeStamp)) {
 				return false;
 			} else {
 				return true;
@@ -37,15 +39,15 @@ class CacheHandler
 
 	public function checkClientCache()
 	{
+		$lastModifiedTime = gmdate("D, d M Y H:i:s", static::$priceMTime) . " GMT";
+
 		if( isset($_SERVER['HTTP_IF_NONE_MATCH']) ) {
-			if ( $_SERVER['HTTP_IF_NONE_MATCH'] == $this->_filehandler->getFile('eTag') ) {
-				header("HTTP/1.1 304 Not Modified");
+			if ( $_SERVER['HTTP_IF_NONE_MATCH'] == $this->_cacheFile->getFile('eTag') ) {
 				return true;
 			}
 		}
 		if (isset($_SERVER['HTTP_IF_MODIFIED_SINCE'])) {
 			if ($_SERVER['HTTP_IF_MODIFIED_SINCE'] == $lastModifiedTime) {
-				header("HTTP/1.1 304 Not Modified");
 				return true;
 			}
 		}
@@ -59,9 +61,10 @@ class CacheHandler
 
 	public function sendServerCache()
 	{
-		header("Last-Modified: " . $this->gmtTime);
-		header("ETag: " . $this->_filehandler->getFile('eTag'));
-		readfile($this->_filehandler . 'valuationOutput');
+		$lastModifiedTime = gmdate("D, d M Y H:i:s", static::$priceMTime) . " GMT";
+		header("Last-Modified: " . $lastModifiedTime);
+		header("ETag: " . $this->_cacheFile->getFile('eTag'));
+		readfile($this->_cacheFile . 'valuationOutput');
 	}
 
 }

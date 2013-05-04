@@ -3,8 +3,8 @@
 class contentEngine
 {
 	public $valuationOutput = '';
-	private $_prices_handler = null;
-	private $_validProductList = [];
+	protected $_prices_handler = null;
+	protected $_validProductList = [];
 
 	public function __construct()
 	{
@@ -21,7 +21,7 @@ class contentEngine
 		}
 	}
 
-	private function priceParser($filename) //分離行列中的產品與價格
+	protected function priceParser($filename) //分離行列中的產品與價格
 	{
 		$fileContent = $this->_prices_handler->getFileLineByLine( $fileList[$i] ); //讀取單檔內容
 		
