@@ -17,7 +17,7 @@ class Nyan_Generator
 		$template->get_header(); // get html head
 		$template->get_upperIndex($cacheObj->mTime); // get body header
 
-		$file_list = glob(NYAN_DIR_PRICES . '*.txt'); // read file list from system
+		$file_list = glob(NYAN_DIR_PRICES . '*.[tT][xX][tT]'); // read file list from system
 		for ($i = 0; $i < count($file_list); $i ++) { // loop through files
 			$fileBuffer = file($file_list[$i], FILE_IGNORE_NEW_LINES); // read file
 			list($products, $amountOfProduct, $productCache) = $this->parse_priceFile($fileBuffer); // parse and split
@@ -72,7 +72,7 @@ class Nyan_Generator
 	public function get_categoryName($source)
 	{
 		// get rid of .txt
-		preg_match("/(.*)\/(.*).txt/", $source, $matches);
+		preg_match("/(.*)\/(.*).(txt|TXT)/", $source, $matches);
 		$source = $matches[2];
 
     	// detect the character encoding of the incoming file

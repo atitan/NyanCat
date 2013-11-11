@@ -27,14 +27,20 @@ class Nyan_Template
 
 		foreach ($product as $key => $value) {
 			if ($value['price'] == -1) {
+				if(isset($optgroupNode)) { 
+					$parentNode->appendChild($optgroupNode); 
+				}
 				$optgroupNode = $parentNode->createElement('optgroup');
 				$optgroupNode->setAttribute('label', $value['name']);
-
 			} else {
 				$optionNode = $parentNode->createElement('option', $value['name'].' - $'.$value['price']);
 				$optionNode->setAttribute('data-price', $value['price']);
 				$optionNode->setAttribute('value', $product_counter++);
-				$optgroupNode->appendChild($optionNode);
+				if(isset($optgroupNode)) { // 第一筆資料為直接為商品時會發生問題，要判定是否有 Group 來決定直接放進去還是放到 Group
+          			$optgroupNode->appendChild($optionNode);
+        		} else {
+          			$parentNode->appendChild($optionNode);
+        		}
 			}
 		}
  		$parentNode->appendChild($optgroupNode); // assign the last node to Document
