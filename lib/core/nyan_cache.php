@@ -6,6 +6,12 @@ class Nyan_Cache
 	public $timeStamp = false;
 	public $lastModifiedTime = false;
 
+	public function __construct()
+	{
+		$this->mTime = filemtime(NYAN_DIR_PRICES);
+		$this->lastModifiedTime = gmdate("D, d M Y H:i:s \G\M\T", $this->mTime);
+	}
+
 	public function check_validity()
 	{
 		if (!$this->check_files()) {
@@ -20,8 +26,7 @@ class Nyan_Cache
 
 	public function check_timestamp()
 	{
-		if (!$this->mTime = filemtime(NYAN_DIR_PRICES) ||
-			!$this->timeStamp = file_get_contents(NYAN_DIR_CACHE.'timeStamp')) {
+		if (!$this->timeStamp = file_get_contents(NYAN_DIR_CACHE . 'timeStamp')) {
 			return false;
 		}
 		if ($this->mTime > $this->timeStamp) {
@@ -60,7 +65,6 @@ class Nyan_Cache
 				return true;
 			}
 		}
-		$this->lastModifiedTime = gmdate("D, d M Y H:i:s \G\M\T", $this->mTime);
 		if (isset($_SERVER['HTTP_IF_MODIFIED_SINCE'])) {
 			if ($_SERVER['HTTP_IF_MODIFIED_SINCE'] == $this->lastModifiedTime) {
 				return true;
@@ -72,7 +76,10 @@ class Nyan_Cache
 
 	public function send_http_header()
 	{
-
+		header("Last-Modified: " . $this->lastModifiedTime);
+		if ($eTag = file_get_contents(NYAN_DIR_CACHE . 'eTag')) {
+			header("ETag: " . $eTag);
+		}
 	}
 
 	public function output()
@@ -82,10 +89,8 @@ class Nyan_Cache
 			die();
 		}
 
-		header("Last-Modified: " . $this->lastModifiedTime);
-		if ($eTag = file_get_contents(NYAN_DIR_CACHE . 'eTag')) {
-			header("ETag: " . $eTag);
-		}
+		$this->send_http_header();
+
 		if (readfile(NYAN_DIR_CACHE . 'valuationOutput') == false) {
 			throw new Exception('快取出錯，請重新整理！');
 		}

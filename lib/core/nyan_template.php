@@ -16,7 +16,6 @@ class Nyan_Template
 
 	public function get_upperIndex($mTime)
 	{
-		echo $mTime;
 		require NYAN_DIR_TEMPLATE . 'upperIndex.php';
 	}
 
@@ -28,13 +27,11 @@ class Nyan_Template
 
 		foreach ($product as $key => $value) {
 			if ($value['price'] == -1) {
-				if (isset($optgroupNode)) {
-					$parentNode->appendChild($optgroupNode);
-				}
 				$optgroupNode = $parentNode->createElement('optgroup');
 				$optgroupNode->setAttribute('label', $value['name']);
+
 			} else {
-				$optionNode = $parentNode->createElement('option', $value['name']);
+				$optionNode = $parentNode->createElement('option', $value['name'].' - $'.$value['price']);
 				$optionNode->setAttribute('data-price', $value['price']);
 				$optionNode->setAttribute('value', $product_counter++);
 				$optgroupNode->appendChild($optionNode);
