@@ -14,10 +14,10 @@ define("NYAN_DIR_TEMPLATE", NYAN_DIR_ROOT . '/lib/template/');
 
 /* check if directory is writable */
 if (!is_writable(NYAN_DIR_CACHE)) {
-	throw new Exception('快取目錄無法寫入');
+    throw new Exception('快取目錄無法寫入');
 }
 if (!is_writable(NYAN_DIR_VALUATIONS)) {
-	throw new Exception('報價目錄無法寫入');
+    throw new Exception('報價目錄無法寫入');
 }
 
 /* load nyan core engine */
