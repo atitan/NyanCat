@@ -74,6 +74,11 @@ class Nyan_Template
 		require NYAN_DIR_TEMPLATE . 'valuation.php';
 	}
 
+	public function show_valuation($content)
+	{
+		require NYAN_DIR_TEMPLATE . 'show.php';
+	}
+
 	public function get_footer()
 	{
 		require NYAN_DIR_TEMPLATE . 'footer.php';

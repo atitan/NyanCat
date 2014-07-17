@@ -50,9 +50,17 @@ class Nyan_Generator
 		return $serial;
 	}
 
-	public function generate_show()
+	public function generate_show($serial)
 	{
+		require NYAN_DIR_CORE . 'nyan_template.php'; // load template engine
+		$template = new Nyan_Template($this->mode);
 
+		$template->get_header();
+
+		$content = $this->fetch_valuation($serial);
+		$template->show_valuation($content);
+
+		$template->get_footer();
 	}
 
 	private function parse_priceFile($fileBuffer)
@@ -172,7 +180,13 @@ class Nyan_Generator
 
     private function fetch_valuation($serial)
     {
-    	
+    	$content = file_get_contents(NYAN_DIR_VALUATIONS . $serial);
+
+		if ($content === false) {
+			throw new Exception('報價單過期或不存在！');
+		}
+
+		return $content;
     }
 
     private function save_valuation($name, $content)

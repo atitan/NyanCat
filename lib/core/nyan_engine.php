@@ -63,11 +63,20 @@ class Nyan_Engine
 		$gen = new Nyan_Generator($this->mode);
 		$serial = $gen->generate_checkout($productCache);
 
-		header('Location: show.php?id=' . $serial);
+		header('Location: show.php?serial=' . $serial);
 	}
 
 	protected function run_show() // show mode executor
 	{
+		$serial = $_GET['serial'];
+
+		if (!preg_match('/^[0-9A-Z]{8}$/', $serial)) {
+			throw new Exception("報價單編號格式不正確！");
+		}
+
+		require NYAN_DIR_CORE . 'nyan_generator.php'; // load generator
+		$gen = new Nyan_Generator($this->mode);
 		
+		$gen->generate_show($serial);
 	}
 }
