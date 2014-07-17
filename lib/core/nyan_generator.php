@@ -31,9 +31,23 @@ class Nyan_Generator
 		$template->get_footer();
 	}
 
-	public function generate_checkout()
+	public function generate_checkout($productCache)
 	{
+		require NYAN_DIR_CORE . 'nyan_template.php'; // load template engine
+		$template = new Nyan_Template($this->mode);
 
+		list($valuation, $total) = $this->generate_valuation($productCache);
+
+		ob_start();
+		$template->get_valuation($valuation, $total);
+		$content = ob_get_contents();
+		ob_end_clean();
+
+
+		$serial = $this->getRefString();
+		$this->save_valuation($serial, $content);
+
+		return $serial;
 	}
 
 	public function generate_show()
@@ -41,7 +55,7 @@ class Nyan_Generator
 
 	}
 
-	public function parse_priceFile($fileBuffer)
+	private function parse_priceFile($fileBuffer)
 	{
 		$amountOfProduct = 0;
 		for ($i = 0; $i < count($fileBuffer); $i++) { 
@@ -69,10 +83,10 @@ class Nyan_Generator
 		return array($products, $amountOfProduct, $productCache);
 	}
 
-	public function get_categoryName($source)
+	private function get_categoryName($source)
 	{
 		// get rid of .txt
-		preg_match("/(.*)\/(.*).(txt|TXT)/", $source, $matches);
+		preg_match("/(.*)\/(.*).([tT][xX][tT])/", $source, $matches);
 		$source = $matches[2];
 
     	// detect the character encoding of the incoming file
@@ -93,4 +107,78 @@ class Nyan_Generator
    
     	return $target;
 	}
+
+	private function getRefString() {
+        $characters = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        $string = strtoupper( base_convert(time(), 10, 36) );
+        
+		if( strlen($string) == 6 )
+			$string = '0' . $string;
+		
+        $string .= $characters[mt_rand(0, strlen($characters)-1)];
+
+        if (file_exists(NYAN_DIR_VALUATIONS . $string)) {
+        	return $this->getRefString();
+        }
+
+        return $string;
+    }
+
+    private function generate_valuation($productCache)
+    {
+    	$total = 0;
+    	$itemNumber = 0;
+    	for($i = 0; $i < count($_POST['product']); $i++){
+        	if (!isset($productCache[$_POST['product'][$i]])) {
+        		continue;
+        	}
+
+            //讀取報價
+            $selectedProduct = $productCache[$_POST['product'][$i]];
+            $productName = $selectedProduct['name'];
+            $productPrice = $selectedProduct['price'];
+
+            //設定數量
+            $quantity = $_POST['quantity'][$i];
+            if ($quantity > 1000 || $quantity < 1) {
+                $quantity = 0;
+            }
+            $subtotal = $productPrice * $quantity;
+
+            //紀錄報價
+            if ($quantity == 0) {
+            	continue;
+            }
+
+            if (!isset($valuation[$productName])) {
+                $valuation[$productName]['price'] = $productPrice;
+                $valuation[$productName]['quantity'] = $quantity;
+                $valuation[$productName]['subtotal'] = $subtotal;
+            } else if ($valuation[$productName]['quantity'] + $quantity <= 1000) {
+                $valuation[$productName]['quantity'] += $quantity;
+                $valuation[$productName]['subtotal'] = $valuation[$productName]['price'] * $valuation[$productName]['quantity'];
+            }
+
+            $itemNumber++;
+            $total += $subtotal;
+    	}
+
+    	if ($itemNumber == 0) {
+        	throw new Exception('您忘記選取報價項目！');
+    	}
+
+    	return array($valuation, $total);
+    }
+
+    private function fetch_valuation($serial)
+    {
+    	
+    }
+
+    private function save_valuation($name, $content)
+    {
+    	if (file_put_contents(NYAN_DIR_VALUATIONS . $name, $content) === false) {
+			throw new Exception("無法寫入報價檔！");
+		}
+    }
 }

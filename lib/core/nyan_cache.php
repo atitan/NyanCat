@@ -14,10 +14,22 @@ class Nyan_Cache
 
 	public function check_validity()
 	{
-		if (!$this->check_files()) {
+		clearstatcache();
+
+		if (!$this->check_files() || !$this->check_timestamp()) {
 			return false;
 		}
-		if (!$this->check_timestamp()) {
+
+		return true;
+	}
+
+	public function check_page_validity()
+	{
+		if (!isset($_POST['cache-validator'])) {
+			return false;
+		}
+
+		if (md5($this->$mTime) != $_POST['cache-validator']) {
 			return false;
 		}
 
@@ -48,14 +60,29 @@ class Nyan_Cache
 		return true;
 	}
 
+	public function fetch_cache($name)
+	{
+		$content = file_get_contents(NYAN_DIR_CACHE . $name);
+
+		if ($content === false) {
+			throw new Exception("快取出錯，請重新整理！");
+		}
+
+		return $content;
+	}
+
 	public function save_cache($name, $content)
 	{
-		file_put_contents(NYAN_DIR_CACHE . $name, $content);
+		if (file_put_contents(NYAN_DIR_CACHE . $name, $content) === false) {
+			throw new Exception("無法寫入快取！");
+		}
 	}
 
 	public function save_timestamp()
 	{
-		file_put_contents(NYAN_DIR_CACHE . 'timeStamp', $this->mTime);
+		if (file_put_contents(NYAN_DIR_CACHE . 'timeStamp', $this->mTime) === false) {
+			throw new Exception("無法寫入快取！");
+		}
 	}
 
 	public function check_http_header()

@@ -54,6 +54,26 @@ class Nyan_Template
 		require NYAN_DIR_TEMPLATE . 'lowerIndex.php';
 	}
 
+	public function get_valuation($valuation, $total)
+	{
+		$parentNode = new DOMDocument();
+
+		foreach ($valuation as $key => $value) {
+			$tr = $parentNode->createElement('tr');
+
+			$tr->appendChild($parentNode->createElement('td', $key));
+			$tr->appendChild($parentNode->createElement('td', $value['price']));
+			$tr->appendChild($parentNode->createElement('td', $value['quantity']));
+			$tr->appendChild($parentNode->createElement('td', $value['subtotal']));
+
+			$parentNode->appendChild($tr);
+		}
+
+		$valuation_output = $parentNode->saveHTML();
+
+		require NYAN_DIR_TEMPLATE . 'valuation.php';
+	}
+
 	public function get_footer()
 	{
 		require NYAN_DIR_TEMPLATE . 'footer.php';

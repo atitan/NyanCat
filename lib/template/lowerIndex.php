@@ -10,6 +10,5 @@
 	</div>
 	<div class="clearfix"></div>
 </div>
-<input type="hidden" name="mode" value="evaluate">
-<input type="hidden" name="validator" value="<?php echo md5($mTime); ?>">
+<input type="hidden" name="cache-validator" value="<?php echo md5($mTime); ?>">
 </form>
