@@ -14,8 +14,6 @@ class Nyan_Cache
 
 	public function check_validity()
 	{
-		clearstatcache();
-
 		if (!$this->check_files() || !$this->check_timestamp()) {
 			return false;
 		}

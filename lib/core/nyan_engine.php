@@ -76,7 +76,7 @@ class Nyan_Engine
 
 		require NYAN_DIR_CORE . 'nyan_generator.php'; // load generator
 		$gen = new Nyan_Generator($this->mode);
-		
+
 		$gen->generate_show($serial);
 	}
 }
