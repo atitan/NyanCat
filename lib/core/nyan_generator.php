@@ -17,6 +17,7 @@ class Nyan_Generator
 		$template->get_header(); // get html head
 		$template->get_upperIndex($cacheObj->mTime); // get body header
 
+		$mainProductCache = array();
 		$file_list = glob(NYAN_DIR_PRICES . '*.[tT][xX][tT]'); // read file list from system
 		for ($i = 0; $i < count($file_list); $i ++) { // loop through files
 			$fileBuffer = file($file_list[$i], FILE_IGNORE_NEW_LINES); // read file
@@ -24,8 +25,9 @@ class Nyan_Generator
 			
 			$category_name = $this->get_categoryName($file_list[$i]);
 			$template->get_category($category_name, $amountOfProduct, $products);
+			$mainProductCache = array_merge($mainProductCache, $productCache);
 		}
-		$cacheObj->save_cache('productCache', serialize($productCache));
+		$cacheObj->save_cache('productCache', serialize($mainProductCache));
 
 		$template->get_lowerIndex($cacheObj->mTime);
 		$template->get_footer();
@@ -77,8 +79,8 @@ class Nyan_Generator
 				$amountOfProduct++;
 
 				$productCache[] = array( // store parsed data for later use
-					'products' => htmlspecialchars(trim($matches[1])),
-					'prices' =>  trim(intval($matches[2]))
+					'name' => htmlspecialchars(trim($matches[1])),
+					'price' =>  trim(intval($matches[2]))
 				);
 			} else {
 				$products[] = array(
@@ -136,8 +138,20 @@ class Nyan_Generator
     {
     	$total = 0;
     	$itemNumber = 0;
+    	
     	for($i = 0; $i < count($_POST['product']); $i++){
-        	if (!isset($productCache[$_POST['product'][$i]])) {
+
+        	//設定數量
+            $quantity = $_POST['quantity'][$i];
+            if ($quantity > 1000 || $quantity < 1) {
+                $quantity = 0;
+            }
+
+            if ($quantity == 0) {
+            	continue;
+            }
+
+            if (!isset($productCache[$_POST['product'][$i]])) {
         		continue;
         	}
 
@@ -145,19 +159,9 @@ class Nyan_Generator
             $selectedProduct = $productCache[$_POST['product'][$i]];
             $productName = $selectedProduct['name'];
             $productPrice = $selectedProduct['price'];
-
-            //設定數量
-            $quantity = $_POST['quantity'][$i];
-            if ($quantity > 1000 || $quantity < 1) {
-                $quantity = 0;
-            }
             $subtotal = $productPrice * $quantity;
 
             //紀錄報價
-            if ($quantity == 0) {
-            	continue;
-            }
-
             if (!isset($valuation[$productName])) {
                 $valuation[$productName]['price'] = $productPrice;
                 $valuation[$productName]['quantity'] = $quantity;

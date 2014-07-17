@@ -27,7 +27,7 @@ class Nyan_Cache
 			return false;
 		}
 
-		if (md5($this->$mTime) != $_POST['cache-validator']) {
+		if (md5($this->mTime) != $_POST['cache-validator']) {
 			return false;
 		}
 
